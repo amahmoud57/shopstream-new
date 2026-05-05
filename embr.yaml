@@ -1,0 +1,26 @@
+platform: nodejs
+platformVersion: "20"
+autoDeploy: true
+
+run:
+  port: 3000
+  startCommand: node server/index.js
+
+dependencies:
+  db:
+    type: postgres
+    required: true
+    description: Primary application database
+    provides:
+      - name: DATABASE_URL
+        secret: true
+        scope: all
+
+static:
+  spaFallback: true
+  headers:
+    "*.js": "public, max-age=31536000, immutable"
+    "*.css": "public, max-age=31536000, immutable"
+
+healthCheck:
+  path: /health
