@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { fetchProducts, fetchCategories, fetchProduct } from '../api';
+import { useCart } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import Pagination from '../components/Pagination';
 import Panel from '../components/Panel';
@@ -13,6 +14,7 @@ const stockClass = (qty) => qty > 20 ? 'stock-ok' : qty > 0 ? 'stock-low' : 'sto
 const stockLabel = (qty) => qty > 20 ? 'In Stock' : qty > 0 ? `${qty} left` : 'Out of Stock';
 
 export default function Products({ initialSearch }) {
+  const { addToCart, cart } = useCart();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState('');
   const [sort, setSort] = useState('newest');
@@ -110,14 +112,16 @@ export default function Products({ initialSearch }) {
       <Pagination page={data.page} pages={data.pages} total={data.total} onNavigate={(p) => setPage(p)} />
 
       <Panel open={panelOpen} onClose={() => setPanelOpen(false)}>
-        {panelData && <ProductDetail data={panelData} categories={cats} />}
+        {panelData && <ProductDetail data={panelData} categories={cats} addToCart={addToCart} cart={cart} />}
       </Panel>
     </>
   );
 }
 
-function ProductDetail({ data: { product: p, reviews }, categories }) {
+function ProductDetail({ data: { product: p, reviews }, categories, addToCart, cart }) {
   const catIcon = (categories.find((c) => c.id === p.category_id) || {}).icon || '📦';
+  const inCart = cart.find((i) => i.product_id === p.id);
+
   return (
     <>
       <div className={`product-img ${gradClass(p.id)}`} style={{ height: 200, borderRadius: 'var(--radius)', marginBottom: 16, fontSize: 64 }}>{catIcon}</div>
@@ -133,6 +137,14 @@ function ProductDetail({ data: { product: p, reviews }, categories }) {
         <span><strong>Rating:</strong> <StarRating rating={p.rating_avg} /> {Number(p.rating_avg).toFixed(1)} ({p.review_count})</span>
         <span><strong>Stock:</strong> <span className={`stock-badge ${stockClass(p.stock_qty)}`}>{stockLabel(p.stock_qty)}</span></span>
       </div>
+      <button
+        className={`btn btn-primary${inCart ? ' in-cart' : ''}`}
+        style={{ width: '100%', justifyContent: 'center', padding: '10px 0', marginBottom: 16 }}
+        onClick={() => addToCart({ ...p, category_icon: catIcon })}
+        disabled={p.stock_qty <= 0}
+      >
+        {p.stock_qty <= 0 ? 'Out of Stock' : inCart ? `In Cart (${inCart.quantity})` : '🛒 Add to Cart'}
+      </button>
       <div style={{ fontSize: 13, color: 'var(--text-dim)', marginBottom: 20, lineHeight: 1.7 }}>{p.description || 'No description available.'}</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>SKU: {p.sku || 'N/A'}</div>
       <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Reviews ({reviews.length})</h3>

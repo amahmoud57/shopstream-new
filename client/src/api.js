@@ -41,3 +41,7 @@ export const submitReview = (data) => apiPost('/api/reviews', data);
 // Analytics
 export const fetchRevenue = (period = 'day', limit = 14) => api(`/api/analytics/revenue?period=${period}&limit=${limit}`);
 export const fetchTopProducts = (limit = 10) => api(`/api/analytics/top-products?limit=${limit}`);
+
+// Cart / Checkout
+export const checkout = (items) =>
+  apiPost('/api/orders', { customer_id: 1, items: items.map((i) => ({ product_id: i.product_id, quantity: i.quantity })) });
