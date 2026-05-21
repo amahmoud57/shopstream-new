@@ -8,7 +8,6 @@ run:
 
 database:
   enabled: true
-  sync: "echo EXTERNAL_SYNC_FAILURE && exit 1"
   seed: "psql $DATABASE_URL -f db/seed.sql"
 
 dependencies:
