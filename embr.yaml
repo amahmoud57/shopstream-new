@@ -7,7 +7,6 @@ run:
   startCommand: node server/index.js
 
 database:
-  enabled: true
   seed: "psql $DATABASE_URL -f db/seed.sql"
 
 dependencies:
@@ -22,6 +21,9 @@ dependencies:
 
 static:
   spaFallback: true
+  headers:
+    "*.js": "public, max-age=31536000, immutable"
+    "*.css": "public, max-age=31536000, immutable"
 
 healthCheck:
   path: /health
